@@ -438,7 +438,7 @@ function useMultiplayer(playerPos: [number, number, number], name: string, avata
 
   // Connect socket only once
   useEffect(() => {
-    const socket: Socket = io('http://localhost:4000');
+    const socket: Socket = io('https://kodziarze.onrender.com:10000');
     socketRef.current = socket;
     socket.emit('join', { x: playerPos[0], y: playerPos[1], z: playerPos[2], name, shape: avatar.bodyShape, color: avatar.bodyColor, headShape: avatar.headShape, headColor: avatar.headColor, accessories: avatar.accessories });
     socket.on('players', (players) => {
@@ -982,7 +982,7 @@ function App() {
   const [chatInput, setChatInput] = useState('');
   const chatSocketRef = useRef<Socket | null>(null);
   useEffect(() => {
-    const socket: Socket = io('http://localhost:4000');
+    const socket: Socket = io('https://kodziarze.onrender.com:10000');
     chatSocketRef.current = socket;
     socket.on('chat_history', (msgs) => {
       setChatMessages(msgs);
@@ -1001,7 +1001,7 @@ function App() {
   // PvP Socket.io setup
   useEffect(() => {
     if (nameConfirmed && avatar) {
-      const socket: Socket = io('http://localhost:4000');
+      const socket: Socket = io('https://kodziarze.onrender.com:10000');
       setMultiplayerSocket(socket);
       socket.emit('join', {
         x: 0, y: 0.5, z: 15, // spawn position

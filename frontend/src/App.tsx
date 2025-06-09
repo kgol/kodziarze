@@ -322,7 +322,7 @@ const challenges = [
   {
     id: 1,
     position: [3, 0.5, 3] as [number, number, number],
-    description: 'Write a function that returns the sum of two numbers.',
+    description: 'Napisz funkcję, która zwraca sumę dwóch liczb.',
     starterCode: '// Write your function here\nfunction sum(a, b) {\n  return a + b;\n}',
     test: (fn: any) => typeof fn === 'function' && fn(2, 3) === 5 && fn(-1, 1) === 0,
     exp: 10,
@@ -330,7 +330,7 @@ const challenges = [
   {
     id: 2,
     position: [-4, 0.5, 2] as [number, number, number],
-    description: 'Write a function that returns the factorial of a number.',
+    description: 'Napisz funkcję, która zwraca silnię liczby.',
     starterCode: '// Write your function here\nfunction factorial(n) {\n  // ...\n}',
     test: (fn: any) => typeof fn === 'function' && fn(5) === 120 && fn(0) === 1,
     exp: 15,
@@ -338,7 +338,7 @@ const challenges = [
   {
     id: 3,
     position: [0, 0.5, -5] as [number, number, number],
-    description: 'Write a function that reverses a string.',
+    description: 'Napisz funkcję, która odwraca przekazany napis (string).',
     starterCode: '// Write your function here\nfunction reverse(str) {\n  // ...\n}',
     test: (fn: any) => typeof fn === 'function' && fn('abc') === 'cba' && fn('') === '',
     exp: 12,
@@ -347,7 +347,7 @@ const challenges = [
   {
     id: 4,
     position: [8, 0.5, -3] as [number, number, number],
-    description: 'Write a function that returns a React element: <button>Click me!</button>.',
+    description: 'Napisz funkcję, która zwraca element React: <button>Kliknij mnie!</button>.',
     starterCode: '// Write your function here\nfunction makeButton() {\n  // ...\n}',
     test: (fn: any) => {
       const el = fn && fn();
@@ -359,7 +359,7 @@ const challenges = [
   {
     id: 5,
     position: [-7, 0.5, -7] as [number, number, number],
-    description: 'Write a function that returns a JSON object with keys name and age.',
+    description: 'Napisz funkcję, która zwraca obiekt JSON z kluczami name i age.',
     starterCode: '// Write your function here\nfunction getUser() {\n  // ...\n}',
     test: (fn: any) => {
       const obj = fn && fn();
@@ -371,7 +371,7 @@ const challenges = [
   {
     id: 6,
     position: [6, 0.5, 8] as [number, number, number],
-    description: 'Write a SQL SELECT query string to get all users from a table named users.',
+    description: 'Napisz zapytanie SQL SELECT jako string, aby pobrać wszystkich użytkowników z tabeli users.',
     starterCode: "// Return a SQL query as a string\nfunction getQuery() {\n  // ...\n}",
     test: (fn: any) => {
       const q = fn && fn();
@@ -383,7 +383,7 @@ const challenges = [
   {
     id: 7,
     position: [-10, 0.5, 5] as [number, number, number],
-    description: 'Write a function that returns the nth Fibonacci number.',
+    description: 'Napisz funkcję, która zwraca n-ty wyraz ciągu Fibonacciego.',
     starterCode: '// Write your function here\nfunction fib(n) {\n  // ...\n}',
     test: (fn: any) => typeof fn === 'function' && fn(7) === 13 && fn(0) === 0,
     exp: 17,
@@ -392,7 +392,7 @@ const challenges = [
   {
     id: 8,
     position: [12, 0.5, -10] as [number, number, number],
-    description: 'Write a function that checks if a string is a palindrome.',
+    description: 'Napisz funkcję, która sprawdza czy napis jest palindromem.',
     starterCode: '// Write your function here\nfunction isPalindrome(str) {\n  // ...\n}',
     test: (fn: any) => typeof fn === 'function' && fn('aba') === true && fn('abc') === false,
     exp: 13,
@@ -401,7 +401,7 @@ const challenges = [
   {
     id: 9,
     position: [-12, 0.5, -12] as [number, number, number],
-    description: 'Write a function that returns the sum of all numbers in an array.',
+    description: 'Napisz funkcję, która zwraca sumę wszystkich liczb w tablicy.',
     starterCode: '// Write your function here\nfunction arraySum(arr) {\n  // ...\n}',
     test: (fn: any) => typeof fn === 'function' && fn([1,2,3]) === 6 && fn([]) === 0,
     exp: 11,
@@ -410,7 +410,7 @@ const challenges = [
   {
     id: 10,
     position: [15, 0.5, 10] as [number, number, number],
-    description: 'Write a function that returns the maximum number in an array.',
+    description: 'Napisz funkcję, która zwraca największą liczbę w tablicy.',
     starterCode: '// Write your function here\nfunction findMax(arr) {\n  // ...\n}',
     test: (fn: any) => typeof fn === 'function' && fn([1,5,2]) === 5 && fn([-1,-2]) === -1,
     exp: 12,
@@ -441,8 +441,24 @@ function useMultiplayer(playerPos: [number, number, number], name: string, avata
     const socket: Socket = io('https://kodziarze.onrender.com');
     socketRef.current = socket;
     socket.emit('join', { x: playerPos[0], y: playerPos[1], z: playerPos[2], name, shape: avatar.bodyShape, color: avatar.bodyColor, headShape: avatar.headShape, headColor: avatar.headColor, accessories: avatar.accessories });
+    // Full sync of all players
     socket.on('players', (players) => {
       setOthers(players.filter((p: any) => p.name !== name));
+    });
+    // Listen for single player movement updates
+    socket.on('player_moved', (data) => {
+      setOthers(prevOthers => {
+        // Find and update the player by name or id
+        const idx = prevOthers.findIndex(p => p.name === data.name);
+        if (idx !== -1) {
+          // Update position
+          const updated = [...prevOthers];
+          updated[idx] = { ...updated[idx], x: data.x, y: data.y, z: data.z };
+          return updated;
+        }
+        // If not found, add new (shouldn't happen, but fallback)
+        return [...prevOthers, data];
+      });
     });
     return () => { socket.disconnect(); };
   }, [name, avatar.bodyShape, avatar.bodyColor, avatar.headShape, avatar.headColor, avatar.accessories]);
@@ -815,10 +831,11 @@ const CodeEditorModal = ({ open, onClose, onSuccess, challenge }: { open: boolea
     }
   };
   return open && challenge ? (
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000a', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
-      <div style={{ background: '#fff', padding: 32, borderRadius: 16, minWidth: 600, minHeight: 400 }}>
-        <h2>Coding Challenge</h2>
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000a', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+      <div style={{ background: '#fff', padding: 32, borderRadius: 16, minWidth: 600, minHeight: 400, zIndex: 10000 }}>
+        <h2>Wyzwanie programistyczne</h2>
         <p>{challenge.description}</p>
+        <div style={{ color: '#444', fontSize: 16, marginBottom: 8 }}><b>Podpowiedź:</b> Odpowiedzi należy pisać w języku <span style={{ color: '#007acc' }}>JavaScript</span>.</div>
         <div style={{ height: 250, marginBottom: 16 }}>
           <Editor
             height="100%"
@@ -828,8 +845,8 @@ const CodeEditorModal = ({ open, onClose, onSuccess, challenge }: { open: boolea
             options={{ minimap: { enabled: false }, fontSize: 16 }}
           />
         </div>
-        <button onClick={handleSubmit} style={{ marginRight: 8 }}>Submit</button>
-        <button onClick={onClose}>Close</button>
+        <button onClick={handleSubmit} style={{ marginRight: 8 }}>Wyślij</button>
+        <button onClick={onClose}>Zamknij</button>
         {feedback && <div style={{ marginTop: 16 }}>{feedback}</div>}
       </div>
     </div>
